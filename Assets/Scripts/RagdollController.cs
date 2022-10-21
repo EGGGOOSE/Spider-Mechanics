@@ -5,66 +5,43 @@ using System.Linq;
 
 public class RagdollController : MonoBehaviour
 {
-    public GameObject circle;
-    public GameObject circle2;
-    public GameObject square;
+    public GameObject cursorCircle;//Курсор
 
     public Muscle muscle1;
     public Muscle muscle2;
     public float muscleScaleRot;
 
-    public Transform anchor;
-    private Vector2 direction;
-    public Transform anchorForScale;
+    public Transform anchor; //Для расчета угла
+    public Transform anchorForScale; //расчет дистанции, для сгибания крайней фаланги
 
     Vector2 from;
     Vector2 to;
-    public Transform[] borderPoints;
-    public float minX, maxX, minY, maxY;
+
+    public Transform[] borderPoints; //точки,образующие 4х-угольник, в пределах которых может двигаться курсор
+    public float minX, maxX, minY, maxY; // Набор крайних точек для ограничения курсора
+    //Тут списки X/Y точек из borderPoints
     public List<float> xPositions = null;
     public List<float> yPositions = null;
 
-    /*private void Update()
-    {
-        foreach(Muscle muscle in muscles)
-        {
-            if (muscle.bone.name != "Body")
-            {
-                Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                //muscle.restRotation = Vector2.SignedAngle(transform.Find("Body").position, mousePos)+180;
-                muscle.restRotation = Vector2.SignedAngle(transform.Find("Body").position, mousePos);
-                Debug.Log(muscle.restRotation);
-                circle.GetComponent<Transform>().position = transform.Find("Body").position;
-            }
-            muscle.ActivateMuscle();
-        }   
-    }*/
-    //центр у якоря
-    //сгибание
     private void Start()
     {
-        Cursor.visible = false;
+        Cursor.visible = false; //Вырубить курсор
     }
 
     private void Update()
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        from = new Vector2(anchor.position.x, 0);
         Vector2 anchorPos = new Vector2(anchor.position.x, anchor.position.y);
-        circle2.transform.position = mousePos;
-        direction = new Vector2(circle2.transform.position.x, circle2.transform.position.y) - anchorPos;
-        to = direction; 
+        from = anchorPos;
+        cursorCircle.transform.position = mousePos;
+        to = new Vector2(cursorCircle.transform.position.x, cursorCircle.transform.position.y) - anchorPos; 
         
         muscle1.restRotation = Vector2.SignedAngle(from, to);
-        muscle2.restRotation = Vector2.SignedAngle(from, to) + RotationScale(circle2.transform.position, anchorForScale.position);
-
-        //Debug.Log(Vector2.SignedAngle(from, to));
+        muscle2.restRotation = Vector2.SignedAngle(from, to) + RotationScale(cursorCircle.transform.position, anchorForScale.position);
         
-        square.transform.position = new Vector2(anchor.position.x, transform.position.y);
-        //Debug.Log(RotationScale(mousePos,new Vector2(anchor.position.x,anchor.position.y)));
         foreach (Muscle muscle in Muscle.muscles)
             muscle.ActivateMuscle();
-
+        //Итератор для добавления точек в списки, чтобы из них вычленить мин макс точки
         foreach (Transform borderPoint in borderPoints)
         {         
             float borderPosX = borderPoint.position.x;
@@ -77,10 +54,11 @@ public class RagdollController : MonoBehaviour
         minY = yPositions.Min();
         maxY = yPositions.Max();
 
-        if (circle2.transform.position.x > maxX ^ circle2.transform.position.x < minX)
-            circle2.transform.position = circle2.transform.position.x > maxX ? new Vector2(maxX, circle2.transform.position.y) : new Vector2(minX, circle2.transform.position.y);
-        if (circle2.transform.position.y > maxY ^ circle2.transform.position.y < minY)
-            circle2.transform.position = circle2.transform.position.y > maxY ? new Vector2(circle2.transform.position.x, maxY) : new Vector2(circle2.transform.position.x, minY);
+        //Проверка на выход игрового курсора за карйние точки, чтобы вернуть его 
+        if (cursorCircle.transform.position.x > maxX ^ cursorCircle.transform.position.x < minX)
+            cursorCircle.transform.position = cursorCircle.transform.position.x > maxX ? new Vector2(maxX, cursorCircle.transform.position.y) : new Vector2(minX, cursorCircle.transform.position.y);
+        if (cursorCircle.transform.position.y > maxY ^ cursorCircle.transform.position.y < minY)
+            cursorCircle.transform.position = cursorCircle.transform.position.y > maxY ? new Vector2(cursorCircle.transform.position.x, maxY) : new Vector2(cursorCircle.transform.position.x, minY);
 
         xPositions.Clear();
         yPositions.Clear();

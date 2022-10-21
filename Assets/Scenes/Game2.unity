@@ -269,9 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7c9cf4daefb28845a4f5a4ec49d425a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  circle: {fileID: 0}
-  circle2: {fileID: 0}
-  square: {fileID: 0}
+  cursorCircle: {fileID: 0}
   muscle1:
     bone: {fileID: 2078240170}
     restRotation: 0
@@ -1768,7 +1766,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 331795860}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -1959,7 +1957,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 382411678}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -2433,9 +2431,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7c9cf4daefb28845a4f5a4ec49d425a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  circle: {fileID: 1697047085}
-  circle2: {fileID: 1101708529}
-  square: {fileID: 2054100035}
+  cursorCircle: {fileID: 0}
   muscle1:
     bone: {fileID: 632972264}
     restRotation: 0
@@ -2844,7 +2840,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
   m_Constraints: 0
 --- !u!233 &625399751
 HingeJoint2D:
@@ -3372,7 +3368,7 @@ GameObject:
   - component: {fileID: 1101708531}
   - component: {fileID: 1101708530}
   m_Layer: 0
-  m_Name: redCirc
+  m_Name: Cursor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3484,7 +3480,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
   m_Constraints: 0
 --- !u!233 &1126749208
 HingeJoint2D:
@@ -4432,7 +4428,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1697047086
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4720,9 +4716,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7c9cf4daefb28845a4f5a4ec49d425a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  circle: {fileID: 1697047085}
-  circle2: {fileID: 1101708529}
-  square: {fileID: 2054100035}
+  cursorCircle: {fileID: 1101708529}
   muscle1:
     bone: {fileID: 1126749207}
     restRotation: 0
@@ -5148,7 +5142,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &2054100036
 SpriteRenderer:
   m_ObjectHideFlags: 0
