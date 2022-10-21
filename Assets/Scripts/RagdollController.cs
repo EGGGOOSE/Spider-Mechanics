@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class RagdollController : MonoBehaviour
 {
@@ -14,9 +15,15 @@ public class RagdollController : MonoBehaviour
 
     public Transform anchor;
     private Vector2 direction;
+    public Transform anchorForScale;
 
     Vector2 from;
     Vector2 to;
+    public Transform[] borderPoints;
+    public float minX, maxX, minY, maxY;
+    public List<float> xPositions = null;
+    public List<float> yPositions = null;
+
     /*private void Update()
     {
         foreach(Muscle muscle in muscles)
@@ -34,34 +41,59 @@ public class RagdollController : MonoBehaviour
     }*/
     //центр у якоря
     //сгибание
+    private void Start()
+    {
+        Cursor.visible = false;
+    }
 
     private void Update()
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         from = new Vector2(anchor.position.x, 0);
         Vector2 anchorPos = new Vector2(anchor.position.x, anchor.position.y);
-        direction = mousePos - anchorPos;
+        circle2.transform.position = mousePos;
+        direction = new Vector2(circle2.transform.position.x, circle2.transform.position.y) - anchorPos;
         to = direction; 
         
         muscle1.restRotation = Vector2.SignedAngle(from, to);
-        muscle2.restRotation = Vector2.SignedAngle(from, to) + RotationScale(mousePos,anchorPos);
+        muscle2.restRotation = Vector2.SignedAngle(from, to) + RotationScale(circle2.transform.position, anchorForScale.position);
 
         //Debug.Log(Vector2.SignedAngle(from, to));
-        circle2.transform.position = mousePos;
+        
         square.transform.position = new Vector2(anchor.position.x, transform.position.y);
         //Debug.Log(RotationScale(mousePos,new Vector2(anchor.position.x,anchor.position.y)));
         foreach (Muscle muscle in Muscle.muscles)
             muscle.ActivateMuscle();
+
+        foreach (Transform borderPoint in borderPoints)
+        {         
+            float borderPosX = borderPoint.position.x;
+            float borderPosY = borderPoint.position.y;
+            xPositions.Add(borderPosX);
+            yPositions.Add(borderPosY);
+        }
+        minX = xPositions.Min();
+        maxX = xPositions.Max();
+        minY = yPositions.Min();
+        maxY = yPositions.Max();
+
+        if (circle2.transform.position.x > maxX ^ circle2.transform.position.x < minX)
+            circle2.transform.position = circle2.transform.position.x > maxX ? new Vector2(maxX, circle2.transform.position.y) : new Vector2(minX, circle2.transform.position.y);
+        if (circle2.transform.position.y > maxY ^ circle2.transform.position.y < minY)
+            circle2.transform.position = circle2.transform.position.y > maxY ? new Vector2(circle2.transform.position.x, maxY) : new Vector2(circle2.transform.position.x, minY);
+
+        xPositions.Clear();
+        yPositions.Clear();
     }
      
     private float RotationScale(Vector2 mousePos,Vector2 anchorPos)
     {
         float distance = Vector2.Distance(mousePos, anchorPos);
-        if (distance >= 4.5f)
+        if (distance >= 2.6f)
         {
             return muscleScaleRot;
         }
-        return muscleScaleRot * distance / 6;
+        return muscleScaleRot * distance / 2.6f;
     }
 
 }
