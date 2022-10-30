@@ -14,8 +14,7 @@ public class RagdollController : MonoBehaviour
     public Transform anchor; //Для расчета угла
     public Transform anchorForScale; //расчет дистанции, для сгибания крайней фаланги
 
-    Vector2 from;
-    Vector2 to;
+    Vector2 toVector;
 
     public Transform[] borderPoints; //точки,образующие 4х-угольник, в пределах которых может двигаться курсор
     public float minX, maxX, minY, maxY; // Набор крайних точек для ограничения курсора
@@ -23,22 +22,52 @@ public class RagdollController : MonoBehaviour
     public List<float> xPositions = null;
     public List<float> yPositions = null;
 
+    private LineRenderer _lineRenderer;
+
     private void Start()
     {
-        Cursor.visible = false; //Вырубить курсор
-    }
+        _lineRenderer = GetComponent<LineRenderer>();
+        _lineRenderer.positionCount = 5;
+        foreach (Muscle muscle in Muscle.muscles)
+            muscle.length = Vector3.Distance(muscle.startPos.position, muscle.endPos.position);//блядь, вообще эту хрень надо делать в конструкторе Muscle, но постоянно какая-то поебень происходит, поэтому пока так.
 
+        //Cursor.visible = false; //Вырубить курсор
+        //Debug.Log( muscle1.bone.GetComponent<SpriteRenderer>().bounds.size.x);
+    }
+    //нужно будет спрайты переделать чтоб идеально ровно они были повернуты относительно двух точек которые считаются костью
     private void Update()
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 anchorPos = new Vector2(anchor.position.x, anchor.position.y);
-        from = anchorPos;
         cursorCircle.transform.position = mousePos;
-        to = new Vector2(cursorCircle.transform.position.x, cursorCircle.transform.position.y) - anchorPos; 
+        toVector = (mousePos - anchorPos).normalized;
+        float angle = Mathf.Atan2(toVector.y, toVector.x) * Mathf.Rad2Deg;
+
+        muscle1.restRotation = angle;
+        muscle2.restRotation = angle;
+
+        float distance = Vector2.Distance(anchorPos, mousePos);
+
+        float a = muscle1.length;
+        float b = muscle2.length;
+        float c = distance;
+
         
-        muscle1.restRotation = Vector2.SignedAngle(from, to);
-        muscle2.restRotation = Vector2.SignedAngle(from, to) + RotationScale(cursorCircle.transform.position, anchorForScale.position);
+        if (0 < distance && distance < muscle1.length + muscle2.length)
+        {
+            muscle1.restRotation += Mathf.Acos((a * a + c * c - b * b) / (2 * a * c)) * Mathf.Rad2Deg;
+            muscle2.restRotation += Mathf.Acos((a * a + b * b - c * c) / (2 * a * b)) * Mathf.Rad2Deg - 180f;
+            Debug.Log(muscle1.restRotation + " " + muscle2.restRotation + "\n"
+                + distance + " " + (muscle1.length + muscle2.length));
+        }
         
+
+        _lineRenderer.SetPosition(0, muscle1.startPos.position);
+        _lineRenderer.SetPosition(1, muscle1.endPos.position);
+        _lineRenderer.SetPosition(2, muscle2.endPos.position);
+        _lineRenderer.SetPosition(3, muscle1.startPos.position);
+        _lineRenderer.SetPosition(4, mousePos);
+
         foreach (Muscle muscle in Muscle.muscles)
             muscle.ActivateMuscle();
         //Итератор для добавления точек в списки, чтобы из них вычленить мин макс точки
@@ -63,7 +92,12 @@ public class RagdollController : MonoBehaviour
         xPositions.Clear();
         yPositions.Clear();
     }
-     
+
+    private void OnDestroy()
+    {
+        Muscle.muscles = new List<Muscle>();
+    }
+
     private float RotationScale(Vector2 mousePos,Vector2 anchorPos)
     {
         float distance = Vector2.Distance(mousePos, anchorPos);
@@ -81,6 +115,9 @@ public class RagdollController : MonoBehaviour
 public class Muscle
 {
     public Rigidbody2D bone;
+    
+    public Transform startPos, endPos;
+    [HideInInspector] public float length;
     public float restRotation;
     public float force;
     public static List<Muscle> muscles = new List<Muscle>();
