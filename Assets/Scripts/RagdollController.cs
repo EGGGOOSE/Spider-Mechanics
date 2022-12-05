@@ -7,8 +7,11 @@ public class RagdollController : MonoBehaviour
 {
     public GameObject cursorCircle;// урсор
 
-    public Muscle muscle1;
-    public Muscle muscle2;
+    public Muscle muscleR1;
+    public Muscle muscleR2;
+    public Muscle muscleL1;
+    public Muscle muscleL2;
+
     public float muscleScaleRot;
 
     public Transform anchor; //ƒл€ расчета угла
@@ -37,36 +40,8 @@ public class RagdollController : MonoBehaviour
     //нужно будет спрайты переделать чтоб идеально ровно они были повернуты относительно двух точек которые считаютс€ костью
     private void Update()
     {
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 anchorPos = new Vector2(anchor.position.x, anchor.position.y);
-        cursorCircle.transform.position = mousePos;
-        toVector = (mousePos - anchorPos).normalized;
-        float angle = Mathf.Atan2(toVector.y, toVector.x) * Mathf.Rad2Deg;
-
-        muscle1.restRotation = angle;
-        muscle2.restRotation = angle;
-
-        float distance = Vector2.Distance(anchorPos, mousePos);
-
-        float a = muscle1.length;
-        float b = muscle2.length;
-        float c = distance;
-
-        
-        if (0 < distance && distance < muscle1.length + muscle2.length)
-        {
-            muscle1.restRotation += Mathf.Acos((a * a + c * c - b * b) / (2 * a * c)) * Mathf.Rad2Deg;
-            muscle2.restRotation += Mathf.Acos((a * a + b * b - c * c) / (2 * a * b)) * Mathf.Rad2Deg - 180f;
-            Debug.Log(muscle1.restRotation + " " + muscle2.restRotation + "\n"
-                + distance + " " + (muscle1.length + muscle2.length));
-        }
-        
-
-        _lineRenderer.SetPosition(0, muscle1.startPos.position);
-        _lineRenderer.SetPosition(1, muscle1.endPos.position);
-        _lineRenderer.SetPosition(2, muscle2.endPos.position);
-        _lineRenderer.SetPosition(3, muscle1.startPos.position);
-        _lineRenderer.SetPosition(4, mousePos);
+        MoveHand(true);
+        MoveHand(false);
 
         foreach (Muscle muscle in Muscle.muscles)
             muscle.ActivateMuscle();
@@ -78,6 +53,7 @@ public class RagdollController : MonoBehaviour
             xPositions.Add(borderPosX);
             yPositions.Add(borderPosY);
         }
+        
         minX = xPositions.Min();
         maxX = xPositions.Max();
         minY = yPositions.Min();
@@ -91,6 +67,62 @@ public class RagdollController : MonoBehaviour
 
         xPositions.Clear();
         yPositions.Clear();
+    }
+
+    private void MoveHand(bool isLeft)
+    {
+        Muscle muscle1;
+        Muscle muscle2;
+
+        if (isLeft)
+        {
+            muscle1 = muscleL1;
+            muscle2 = muscleL2;
+        }
+        else
+        {
+            muscle1 = muscleR1;
+            muscle2 = muscleR2;
+        }
+
+        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 anchorPos = new Vector2(anchor.position.x, anchor.position.y);
+        cursorCircle.transform.position = mousePos;
+        toVector = (mousePos - anchorPos).normalized;
+
+        float angle = Mathf.Atan2(toVector.y, toVector.x) * Mathf.Rad2Deg + (isLeft ? 180 : 0);
+
+        muscle1.restRotation = angle;
+        muscle2.restRotation = angle;
+
+        float distance = Vector2.Distance(anchorPos, mousePos);
+
+        float a = muscle1.length;
+        float b = muscle2.length;
+        float c = distance;
+
+        if (0 < distance && distance < muscle1.length + muscle2.length)
+        {
+            if (isLeft)
+            {
+                muscle2.restRotation += Mathf.Acos((a * a + c * c - b * b) / (2 * a * c)) * Mathf.Rad2Deg;
+                muscle1.restRotation += Mathf.Acos((a * a + b * b - c * c) / (2 * a * b)) * Mathf.Rad2Deg - 180f;
+            }
+            else
+            {
+                muscle1.restRotation += Mathf.Acos((a * a + c * c - b * b) / (2 * a * c)) * Mathf.Rad2Deg;
+                muscle2.restRotation += Mathf.Acos((a * a + b * b - c * c) / (2 * a * b)) * Mathf.Rad2Deg - 180f;
+            }
+            Debug.Log(muscle1.restRotation + " " + muscle2.restRotation + "\n"
+                + distance + " " + (muscle1.length + muscle2.length));
+        }
+
+
+        //_lineRenderer.SetPosition(0, muscle1.startPos.position);
+        //_lineRenderer.SetPosition(1, muscle1.endPos.position);
+        //_lineRenderer.SetPosition(2, muscle2.endPos.position);
+        //_lineRenderer.SetPosition(3, muscle1.startPos.position);
+        //_lineRenderer.SetPosition(4, mousePos);
     }
 
     private void OnDestroy()
